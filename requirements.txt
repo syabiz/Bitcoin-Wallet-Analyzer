@@ -1,0 +1,12 @@
+# Bitcoin Wallet Analyzer - GUI Version
+# Requirements file
+
+# Core (biasanya sudah termasuk dalam Python standard library)
+# tkinter - GUI framework (built-in)
+
+# Opsional - untuk analisis pattern yang lebih baik
+numpy>=1.19.0
+
+# Untuk pengembangan dan testing (opsional)
+# pytest>=6.0.0
+# black>=20.8b1
