@@ -296,10 +296,9 @@ python3 main.pyw
 - PyWallet: https://github.com/jackjack-jj/pywallet
 - BTCRecover: https://github.com/gurnec/btcrecover
 
-### 💰 Donation
-Donate to Developer
-• Bitcoin.org - Official documentation
-• Bitcoin (BTC) : bc1qn6t8hy8memjfzp4y3sh6fvadjdtqj64vfvlx58")
-• Ethereum (ETH) : 0x512936ca43829C8f71017aE47460820Fe703CAea")
-• Solana (SOL) : 6ZZrRmeGWMZSmBnQFWXG2UJauqbEgZnwb4Ly9vLYr7mi")
+## 💰 Donation
+### Donate to Developer
+- Bitcoin (BTC) : bc1qn6t8hy8memjfzp4y3sh6fvadjdtqj64vfvlx58
+- Ethereum (ETH) : 0x512936ca43829C8f71017aE47460820Fe703CAea
+- Solana (SOL) : 6ZZrRmeGWMZSmBnQFWXG2UJauqbEgZnwb4Ly9vLYr7mi
 
