@@ -1,322 +1,226 @@
-# Bitcoin Wallet Analyzer
+# Bitcoin Wallet Analyzer v2.0 PRO
 
-> **Professional `wallet.dat` analysis & hash extraction tool**  
-> SHA-512 Iterative · AES-256-CBC · BerkeleyDB · HashCat `-m 11300`
+> **by Syabiz** · [syabiz.github.io](https://syabiz.github.io)
 
-![Python](https://img.shields.io/badge/Python-3.10%2B-blue?style=flat-square&logo=python)
-![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey?style=flat-square)
-![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
-![Version](https://img.shields.io/badge/Version-1.0%20PRO-orange?style=flat-square)
-![Tested](https://img.shields.io/badge/Tested%20on-Python%203.10.11-success?style=flat-square)
-
----
-
-## Description
-
-**Bitcoin Wallet Analyzer** is a Python-based GUI tool built with Tkinter for analyzing Bitcoin Core `wallet.dat` files. It helps users understand the internal structure of a wallet, extract cryptographic information, examine raw binary data, and prepare password hashes for recovery.
-
-This tool runs **100% locally** — no data is ever sent to any server.
+A powerful, offline Bitcoin `wallet.dat` forensic analyzer built with Python and Tkinter. Parses BerkeleyDB structure, decodes cryptographic parameters, validates addresses, and generates detailed statistical reports — all from a clean dark-themed GUI.
 
 ---
 
 ## Features
 
-| Tab | Description |
-|-----|-------------|
-| **Overview** | Full file summary: size, format, encryption status, MD5/SHA-256 checksums, key count |
-| **BDB Structure** | BerkeleyDB internal parsing: page metadata, magic bytes, LSN, flags, record markers with offsets, strings scan, entropy analysis |
-| **Crypto Info** | Full cryptographic details: AES-256-CBC cipher, SHA-512 KDF, iteration count, BIP32/HD detection, script type hints, randomness test |
-| **Hash Extraction** | Extract hash using the official `bitcoin2john.py` script in HashCat `-m 11300` format |
-| **Addresses** | Bitcoin address extraction: P2PKH (`1...`), P2SH (`3...`), SegWit bech32 (`bc1q...`), Taproot (`bc1p...`) |
-| **Hex Viewer** | Raw hex dump, 16 bytes per row with ASCII panel, offset navigation |
-| **Recovery Guide** | Step-by-step guide for recovering encrypted and unencrypted wallets |
+### Core Analysis
+| Feature | Description |
+|---|---|
+| **BDB Structure Parser** | Accurate BerkeleyDB v8/v9 metadata — magic, byte order, page size, BTree root, unique DB ID |
+| **mkey Record Decoder** | Heuristic decoder for master key record: encrypted key (48B), salt (8B), KDF iterations, derive method |
+| **Crypto Info** | AES-256-CBC specs, SHA-512 KDF params, BIP32/49/84 extended key detection, script bytecodes |
+| **Hash Extraction** | Integrates with official `bitcoin2john.py`; auto-downloads if missing |
+| **Address Extraction** | Regex scan + **Base58Check checksum validation** for legacy; format heuristic for Bech32/Taproot |
+
+### Statistical Analysis
+| Test | Details |
+|---|---|
+| **Shannon Entropy** | Per-byte entropy score with visual progress bar (0–8.0 bits/byte) |
+| **Chi-Square Test** | χ² statistic vs uniform distribution (DOF=255) with p-value interpretation |
+| **Runs Test** | Wald-Wolfowitz test with Z-score — detects non-randomness |
+| **Byte Histogram** | 16×16 ASCII density grid for all 256 byte values |
+| **Region Entropy Map** | File split into blocks; per-block entropy rendered as color-coded heat bar |
+
+### Output & Export
+- Color-coded rich-text output per tab (green / yellow / red / cyan / purple)
+- **JSON export** of all analysis results
+- Copy-to-clipboard and Save-to-file for every tab
+- Full checksums: MD5, SHA-1, SHA-256, SHA-512
+
+---
+
+## Tabs
+
+| Tab | Contents |
+|---|---|
+| **Overview** | Stat cards + full report: file info, format, encryption, key counts, entropy, next steps |
+| **BDB Structure** | Magic, page metadata, BTree details, wallet markers with offsets, string scan, checksums |
+| **Crypto & KDF** | mkey decode, key inventory, AES-256-CBC specs, BIP32/49/84 detection, script patterns |
+| **Hash Extraction** | Official `bitcoin2john.py` output + 10-field hash breakdown + cracking command reference |
+| **Addresses** | Base58Check-validated P2PKH/P2SH + Bech32 P2WPKH/P2WSH/P2TR + Testnet |
+| **Entropy Map** | Shannon entropy, chi-square, runs test, byte histogram, region heat map |
+| **Hex Viewer** | Configurable offset/rows hex dump with ASCII panel |
+| **Recovery Guide** | Step-by-step: encrypted, unencrypted, HD, and corrupt wallet scenarios |
 
 ---
 
 ## Requirements
 
-### Python Version
+| Requirement | Version |
+|---|---|
+| Python | 3.7 or newer |
+| Tkinter | Included with standard Python |
+| numpy | Optional (not required) |
 
-- **Python 3.10.x** — tested & verified on Python 3.10.11
-- Python 3.8+ should be compatible
-
-### Python Modules
-
-This tool uses **only Python standard library modules** — no external packages required:
-
-| Module | Purpose | Built-in? |
-|--------|---------|-----------|
-| `tkinter` | GUI framework | Yes |
-| `tkinter.ttk` | Themed widgets | Yes |
-| `tkinter.scrolledtext` | Scrollable text widget | Yes |
-| `tkinter.filedialog` | File browser dialog | Yes |
-| `tkinter.messagebox` | Popup dialogs | Yes |
-| `struct` | Binary data parsing | Yes |
-| `math` | Entropy calculation | Yes |
-| `re` | Regex for address extraction | Yes |
-| `hashlib` | MD5, SHA-1, SHA-256 checksums | Yes |
-| `pathlib` | File path handling | Yes |
-| `collections` | Byte frequency counter | Yes |
-| `threading` | Background analysis (non-blocking UI) | Yes |
-| `datetime` | File timestamp info | Yes |
-| `subprocess` | Running `bitcoin2john.py` | Yes |
-| `urllib.request` | Auto-download `bitcoin2john.py` | Yes |
-| `numpy` | Advanced pattern analysis | Optional |
-
-> `numpy` is optional. The tool runs fully without it.
+> **No third-party pip packages required.** Everything runs on Python stdlib.
 
 ---
 
-## Installation & Running
-
-### Windows
-
-```batch
-:: Check Python version
-python --version
-
-:: Clone the repository
+## Installation
+```bash
+# 1. Clone or download this repository
 git clone https://github.com/syabiz/bitcoin-wallet-analyzer.git
 cd bitcoin-wallet-analyzer
 
-:: Run directly — no pip install needed
-python bitcoin_wallet_analyzer.py
+# 2. (Optional) Place bitcoin2john.py in the same folder
+#    or let the app download it automatically on first use
+
+# 3. Run
+python bitcoin_wallet_analyzer_v2.py
 ```
 
-### Linux / macOS
-
+**Linux** — if Tkinter is missing:
 ```bash
-# Make sure tkinter is available
-sudo apt install python3-tk        # Ubuntu / Debian
-sudo dnf install python3-tkinter   # Fedora
-
-# Clone and run
-git clone https://github.com/syabiz/bitcoin-wallet-analyzer.git
-cd bitcoin-wallet-analyzer
-python3 bitcoin_wallet_analyzer.py
+sudo apt install python3-tk
 ```
 
----
-
-## How to Use
-
-### Step 1 — Open a Wallet File
-
-1. Launch the tool: `python bitcoin_wallet_analyzer.py`
-2. Click **Browse...** at the top
-3. Select your `wallet.dat` file
-4. Click **Analyze Wallet**
-
-Default `wallet.dat` locations:
-
-| OS | Path |
-|----|------|
-| Windows | `%APPDATA%\Bitcoin\wallet.dat` |
-| Linux | `~/.bitcoin/wallet.dat` |
-| macOS | `~/Library/Application Support/Bitcoin/wallet.dat` |
-
----
-
-### Step 2 — Overview Tab
-
-After analysis completes, the **Overview** tab displays a full summary along with five stat cards at the top:
-
-| Card | Description |
-|------|-------------|
-| `File Size` | Size of the wallet file |
-| `Format` | Database format (BDB v8/v9 or SQLite) |
-| `Encrypted` | Encryption status (YES / NO) |
-| `Est. Keys` | Estimated number of private keys |
-| `Entropy` | Shannon entropy value (0 to 8 scale) |
-
-Example output:
-
-```
-File    : C:\Users\...\wallet.dat
-Size    : 262,144 bytes  (256.00 KB)
-MD5     : a1b2c3d4e5f6...
-SHA-256 : 9f8e7d6c5b4a...
-
-Format    : Berkeley DB v9 (BTree)
-Encrypted : YES  (password protected)
-Keys found: 101
-```
-
----
-
-### Step 3 — BDB Structure Tab
-
-Parses BerkeleyDB internals including:
-
-- **Page Metadata** — page size, version, magic number, LSN, flags, record counts
-- **Key-Value Record Markers** — all found markers (`mkey`, `ckey`, `name`, `tx`, `pool`, `hdchain`, etc.) with occurrence count and hex offsets
-- **Printable Strings** — readable strings found in the binary data
-- **Entropy Analysis** — Shannon entropy with visual bar chart
-- **File Checksums** — MD5, SHA-1, SHA-256
-
----
-
-### Step 4 — Crypto Info Tab
-
-Provides full cryptographic analysis:
-
-- **Encryption Status** — whether the wallet is encrypted and position of `mkey` record
-- **Master Key Details** — hex dump of `mkey` record with estimated KDF iteration count and cracking speed estimate
-- **Key Inventory** — counts for `ckey`, `key`, `wkey`, `pool`, `hdchain`
-- **Cipher Details** — AES-256-CBC, SHA-512 KDF, 8-byte salt, PKCS7 padding, HashCat mode
-- **HD Wallet Detection** — BIP32 xprv/xpub, hdchain, hdseed markers
-- **Script Type Hints** — P2PKH, P2SH, SegWit, Taproot bytecode detection
-- **Randomness Test** — runs test for encryption quality assessment
-
----
-
-### Step 5 — Hash Extraction Tab
-
-1. Click **Extract Hash via bitcoin2john.py**
-2. If `bitcoin2john.py` is not present, the tool will offer to **download it automatically** from the official John the Ripper repository
-3. The extracted hash appears in HashCat format:
-
-```
-wallet.dat:$bitcoin$64$abcdef....$16$deadbeef....$35714$2$00$2$00
-```
-
-4. Click **Copy Hash** or **Save Hash** to export it
-
-**Cracking with HashCat:**
-
+**macOS** with Homebrew Python:
 ```bash
-# Dictionary attack
+brew install python-tk
+```
+
+---
+
+## Usage
+
+1. Click **Browse…** and select your `wallet.dat` file
+2. Click **⚡ Analyze Wallet** — runs in background thread
+3. Navigate tabs for detailed results
+4. On **Hash Extraction** tab → **⚡ Extract Hash via bitcoin2john.py**
+5. Save hash and crack with HashCat or John the Ripper
+6. Click **💾 Export JSON** to save full analysis
+
+---
+
+## Hash Cracking Quick Reference
+```bash
+# HashCat — GPU accelerated (recommended)
 hashcat -m 11300 hash.txt rockyou.txt
-
-# Dictionary + mutation rules
 hashcat -m 11300 hash.txt rockyou.txt -r rules/best64.rule
+hashcat -m 11300 hash.txt -a 3 ?a?a?a?a?a?a?a?a        # brute-force 8 chars
+hashcat -m 11300 hash.txt -a 3 --increment ?l?l?l?d?d?d  # mask attack
 
-# Brute force up to 8 characters
-hashcat -m 11300 hash.txt -a 3 ?a?a?a?a?a?a?a?a
-```
-
-**Cracking with John the Ripper:**
-
-```bash
-john --format=bitcoin-core hash.txt --wordlist=wordlist.txt
+# John the Ripper — CPU
+john --format=bitcoin-core hash.txt --wordlist=rockyou.txt
+john --restore
 john --show hash.txt
 ```
 
-Recommended wordlists:
-- [rockyou.txt](https://github.com/brannondorsey/naive-hashcat/releases/download/data/rockyou.txt) — 14 million common passwords
-- [SecLists](https://github.com/danielmiessler/SecLists) — comprehensive collection
-- [CrackStation](https://crackstation.net/crackstation-wordlist-password-cracking-dictionary.htm) — 15 GB mega list
+> HashCat mode **`-m 11300`** = Bitcoin/Litecoin `wallet.dat`
 
 ---
 
-### Step 6 — Addresses Tab
+## Encryption Scheme
+```
+User Passphrase
+      │
+      ▼
+SHA-512( passphrase ‖ salt )  ← repeated N times (KDF iterations)
+      │
+      ├─── bytes [0..31]  →  AES-256 key
+      └─── bytes [32..47] →  IV
+              │
+              ▼
+AES-256-CBC decrypt  ←  48-byte encrypted master key (from mkey record)
+              │
+              ▼
+        Master Key (32 bytes)
+              │
+              ▼
+AES-256-CBC decrypt  ←  ckey records (encrypted private keys)
+              │
+              ▼
+        Private Keys
+```
 
-1. Click **Extract Addresses**
-2. The tool scans for Bitcoin address patterns across all types:
-   - `1...` and `3...` — Legacy P2PKH and P2SH
-   - `bc1q...` — SegWit bech32 (P2WPKH / P2WSH)
-   - `bc1p...` — Taproot (P2TR)
-3. Click **Save List** to export as a `.txt` file
-
-> Address extraction uses regex pattern matching on raw binary. Results are approximate and may include false positives. For a complete and verified list, use `bitcoin-cli dumpwallet`.
+| Parameter | Value |
+|---|---|
+| Cipher | AES-256-CBC |
+| Block size | 128 bits (16 bytes) |
+| Key size | 256 bits (32 bytes) |
+| KDF | SHA-512 iterative (Bitcoin Core custom) |
+| Salt | 8 bytes random, stored in `mkey` record |
+| Padding | PKCS#7 |
+| Validation | Last 16 bytes of decrypted mkey = `0x10` |
+| HashCat mode | `-m 11300` |
+| John mode | `--format=bitcoin-core` |
 
 ---
 
-### Step 7 — Hex Viewer Tab
+## Wallet Record Reference
 
-Displays the raw binary file content as a classic hex dump:
-
-```
-Offset      00 01 02 03 04 05 06 07  08 09 0A 0B 0C 0D 0E 0F   ASCII
-────────────────────────────────────────────────────────────────────────
-0x00000000  62 31 05 00 00 00 00 00  00 00 00 00 09 00 00 00   b1..............
-0x00000010  00 10 00 00 09 00 00 00  00 00 00 00 00 00 00 00   ................
-```
-
-- Enter an offset (in hexadecimal) in the Offset field and click **Go** to jump to a specific location
-- Default view shows the first 8 KB of the file
-
----
-
-## Technical Reference — Cryptographic Algorithm
-
-```
-Bitcoin Core wallet.dat Password Recovery Flow
-──────────────────────────────────────────────────────────────────
-
-1. Key Derivation Function (KDF):
-   hash[0]   = SHA512(password + salt)
-   hash[N]   = SHA512(hash[N-1])        <- repeated N times (iterations)
-   key       = hash_final[0..31]        <- 32 bytes  ->  AES-256 key
-   iv        = hash_final[32..47]       <- 16 bytes  ->  AES-CBC IV
-
-2. Decryption:
-   plaintext = AES-256-CBC-Decrypt(encrypted_key, key, iv)
-
-3. Validation:
-   plaintext[-16:] == b'\x10' * 16      <- PKCS7 padding check = password correct
-
-HashCat mode : -m 11300
-John mode    : --format=bitcoin-core
-```
+| Record | Description |
+|---|---|
+| `mkey` | Master key — encrypted with user passphrase (AES-256-CBC) |
+| `ckey` | Encrypted private key (AES-256-CBC with master key) |
+| `key\x00` | **Plaintext** private key — CRITICAL risk if present |
+| `wkey` | Watch-only key (public key, no spending power) |
+| `pool` | Pre-generated key pool for privacy |
+| `tx\x00` | Raw transaction data |
+| `hdchain` | BIP32 HD derivation chain metadata |
+| `hdseed` | BIP32 HD master seed |
+| `keymeta` | Key metadata: birth time, HD derivation path |
+| `version\x00` | Wallet version integer |
+| `defaultkey` | Currently active default key |
+| `bestblock` | Best chain tip known to this wallet |
+| `walletdescriptor` | Descriptor wallet record (Bitcoin Core ≥ 0.21) |
+| `name` | Human-readable address label |
+| `lockedcoins` | Locked (frozen) coin outpoints |
 
 ---
 
-## Repository Structure
+## Tools & Resources
 
-```
-bitcoin-wallet-analyzer/
-├── bitcoin_wallet_analyzer.py   # Main script
-├── README.md                    # This documentation
-├── LICENSE                      # MIT License
-└── bitcoin2john.py              # Optional — auto-downloaded if missing
-```
+| Tool | URL |
+|---|---|
+| HashCat | https://hashcat.net |
+| John the Ripper | https://www.openwall.com/john/ |
+| bitcoin2john.py | https://github.com/openwall/john |
+| PyWallet | https://github.com/jackjack-jj/pywallet |
+| BTCRecover | https://github.com/gurnec/btcrecover |
+| Bitcoin Core | https://bitcoin.org/en/download |
+| Mempool Explorer | https://mempool.space |
 
 ---
 
 ## Disclaimer
 
-- This tool is intended **only for educational purposes** and for recovering wallets you legally own
-- **Do not** use this tool to access wallets that do not belong to you
-- Unauthorized access to cryptocurrency wallets may be **illegal** under applicable laws in your jurisdiction
-- Address extraction results are approximate — use `bitcoin-cli dumpwallet` for a complete verified list
-- This tool runs entirely offline — no data is transmitted to any external server
+> This tool is intended for **educational purposes and recovery of your own wallets only.**  
+> Unauthorized access to Bitcoin wallets belonging to others is **illegal** in most jurisdictions.  
+> The author assumes no responsibility for any misuse of this software.
 
 ---
 
-## Donate
+## Donate · Support Development
 
-If this tool has been useful, feel free to support development:
+If this tool helped you recover your funds, consider supporting:
 
-| Coin | Address |
-|------|---------|
-| **Bitcoin (BTC)** | `bc1qn6t8hy8memjfzp4y3sh6fvadjdtqj64vfvlx58` |
-| **Ethereum (ETH)** | `0x512936ca43829C8f71017aE47460820Fe703CAea` |
-| **Solana (SOL)** | `6ZZrRmeGWMZSmBnQFWXG2UJauqbEgZnwb4Ly9vLYr7mi` |
-| **PayPal** | `syabiz@yandex.com` |
-
-Donations help support new features, documentation, and maintenance.
-
----
-
-## Contact
-
-- **GitHub Issues:** [github.com/syabiz/bitcoin-wallet-analyzer/issues](https://github.com/syabiz/bitcoin-wallet-analyzer/issues)
-- **Email:** syabiz@yandex.com
-- **Twitter:** @syabiz
-- **Website:** [syabiz.github.io](https://syabiz.github.io)
+| Network | Address |
+|---|---|
+| ₿ Bitcoin | `bc1qn6t8hy8memjfzp4y3sh6fvadjdtqj64vfvlx58` |
+| Ξ Ethereum | `0x512936ca43829C8f71017aE47460820Fe703CAea` |
+| ◎ Solana | `6ZZrRmeGWMZSmBnQFWXG2UJauqbEgZnwb4Ly9vLYr7mi` |
+| PayPal | syabiz@yandex.com |
 
 ---
 
 ## License
 
-This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
+MIT License — free to use, modify, and distribute with attribution.
 
 ---
 
-<div align="center">
+*Made with ❤ by [Syabiz](https://syabiz.github.io)*
+```
 
-Made with love for Bitcoin education and learning — **by Syabiz**  
-*Last updated: February 2026*
-
-</div>
+Simpan file ini sebagai `README.md` di folder yang sama dengan `bitcoin_wallet_analyzer_v2.py`. Struktur folder yang disarankan:
+```
+bitcoin-wallet-analyzer/
+├── bitcoin_wallet_analyzer_v2.py
+├── README.md
+└── bitcoin2john.py          ← optional, auto-download jika tidak ada
