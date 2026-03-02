@@ -216,11 +216,3 @@ MIT License — free to use, modify, and distribute with attribution.
 ---
 
 *Made with ❤ by [Syabiz](https://syabiz.github.io)*
-```
-
-Simpan file ini sebagai `README.md` di folder yang sama dengan `bitcoin_wallet_analyzer_v2.py`. Struktur folder yang disarankan:
-```
-bitcoin-wallet-analyzer/
-├── bitcoin_wallet_analyzer_v2.py
-├── README.md
-└── bitcoin2john.py          ← optional, auto-download jika tidak ada
